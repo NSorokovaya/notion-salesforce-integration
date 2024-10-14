@@ -23,7 +23,7 @@ export interface NotionPage {
     | { type: 'external'; external: { url: string } }
     | { type: 'file'; file: { url: string; expiry_time: string } }
     | null;
-  icon?: any;
+  icon?: string | null;
   parent?: {
     type: 'database_id' | 'page_id' | 'block_id' | 'workspace';
     database_id: string;
