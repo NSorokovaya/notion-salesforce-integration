@@ -1,21 +1,43 @@
-import { salesforceConnection } from './repositories/connections';
-import { getNotionData } from './services/notionService';
+import { salesforceConnection } from './src/connections/salesforceConnection';
+import { getNotionData } from './src/services/notionService';
 import {
   loginToSalesforce,
   updateSalesforce,
-} from './services/salesforceService';
+} from './src/services/salesforceService';
+import logger from './src/utils/logger';
+import { retryWithDelay } from './src/utils/retries';
 import { NotionPage } from './types';
+
+const teardown = async () => {
+  try {
+    await salesforceConnection.logout();
+    logger.info('Logged out from Salesforce');
+  } catch (logoutError: unknown) {
+    if (logoutError instanceof Error) {
+      logger.error('Error logging out from Salesforce:', logoutError.message);
+    } else {
+      logger.error('Error:', logoutError);
+    }
+  }
+};
 
 (async function integration() {
   try {
-    await loginToSalesforce();
-    const notionData = await getNotionData();
-    console.log(notionData);
-    await updateSalesforce(notionData as NotionPage[]);
-  } catch (error: any) {
-    console.error('Error in integration process:', error.message);
+    await retryWithDelay(loginToSalesforce);
+    logger.info('Successfully logged in to Salesforce');
+
+    const notionData = await retryWithDelay(getNotionData);
+    logger.info(`Fetched ${notionData.length} records from Notion.`);
+
+    await retryWithDelay(() => updateSalesforce(notionData as NotionPage[]));
+    logger.info('Successfully updated Salesforce with Notion data');
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      logger.error('Integration error:', error.message);
+    } else {
+      logger.error('Integration error:', error);
+    }
   } finally {
-    await salesforceConnection.logout();
-    console.log('Logged out from Salesforce');
+    await teardown();
   }
 })();

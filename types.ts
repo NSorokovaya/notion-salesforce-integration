@@ -24,16 +24,16 @@ export interface NotionPage {
     | { type: 'file'; file: { url: string; expiry_time: string } }
     | null;
   icon?: any;
-  parent: {
+  parent?: {
     type: 'database_id' | 'page_id' | 'block_id' | 'workspace';
     database_id: string;
     page_id: string;
     block_id: string;
     workspace: boolean;
   };
-  archived: boolean;
-  in_trash: boolean;
+  archived?: boolean;
+  in_trash?: boolean;
   properties: NotionPageProperties;
-  url: string;
-  public_url: null | string;
+  url?: string;
+  public_url?: null | string;
 }
