@@ -43,7 +43,7 @@ export async function updateSalesforce(notionData: NotionPage[]) {
         .sobject('Account')
         .upsert(salesforceData, 'Notion_ID__c');
 
-      console.log('Created record in Salesforce:', result);
+      console.log('Data updated in Salesforce:', result);
     } catch (error: unknown) {
       if (error instanceof Error) {
         console.error('Error updating Salesforce:', error.message);
