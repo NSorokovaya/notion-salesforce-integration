@@ -1,5 +1,5 @@
-import { NotionPage } from '../../types';
 import { getSalesforceConnection } from '../connections/salesforceConnection';
+import { NotionPage } from '../types';
 import logger from '../utils/logger';
 import { formatData } from '../utils/utils';
 

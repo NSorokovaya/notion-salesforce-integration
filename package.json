@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node ./index.ts",
+    "start": "ts-node ./src/index.ts",
     "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "coverage": "jest --coverage",
+    "format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,md}'"
   },
   "keywords": [],
   "author": "",

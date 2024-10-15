@@ -40,3 +40,17 @@ Run the tests with:
 ```
 npm test
 ```
+
+To run tests with coverage:
+
+```
+npm run coverage
+```
+
+## Code Formatting
+
+To run prettier:
+
+```
+npm run format
+```

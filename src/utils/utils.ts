@@ -1,6 +1,6 @@
-import { NotionPage } from '../../types';
+import { FormattedData, NotionPage } from '../types';
 
-export function formatData(notionData: NotionPage[]): object[] {
+export function formatData(notionData: NotionPage[]): FormattedData[] {
   return notionData.map((data) => ({
     Name: data.properties.Name.title[0]?.text.content ?? '',
     Website: data.properties.Website.email ?? '',

@@ -1,5 +1,5 @@
+import { NotionPage } from '../../src/types';
 import { delay, formatData } from '../../src/utils/utils';
-import { NotionPage } from '../../types';
 
 describe('Utility Functions', () => {
   describe('formatData', () => {

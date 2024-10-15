@@ -1,7 +1,9 @@
-import { notion } from '../connections/notionConnection';
+import { getNotionConnection } from '../connections/notionConnection';
 import logger from '../utils/logger';
 
 export async function getNotionData() {
+  const notion = getNotionConnection();
+
   try {
     const response = await notion.databases.query({
       database_id: process.env.NOTION_DB_ID!,

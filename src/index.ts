@@ -1,24 +1,12 @@
-import { getSalesforceConnection } from './src/connections/salesforceConnection';
-import { getNotionData } from './src/services/notionService';
+import { getSalesforceConnection } from './connections/salesforceConnection';
+import { getNotionData } from './services/notionService';
 import {
   loginToSalesforce,
   updateSalesforce,
-} from './src/services/salesforceService';
-import logger from './src/utils/logger';
-import { retryWithDelay } from './src/utils/retries';
+} from './services/salesforceService';
 import { NotionPage } from './types';
-
-process.on('uncaughtException', (error) => {
-  logger.error('Uncaught Exception:', error.message);
-  logger.error(error.stack);
-  process.exit(1);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection at:', promise);
-  logger.error('Reason:', reason);
-  process.exit(1);
-});
+import logger from './utils/logger';
+import { retryWithDelay } from './utils/retries';
 
 const teardown = async () => {
   try {
@@ -61,3 +49,15 @@ const teardown = async () => {
     await teardown();
   }
 })();
+
+process.on('uncaughtException', (error) => {
+  logger.error('Uncaught Exception:', error.message);
+  logger.error(error.stack);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise);
+  logger.error('Reason:', reason);
+  process.exit(1);
+});

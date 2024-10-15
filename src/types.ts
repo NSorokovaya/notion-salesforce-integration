@@ -37,3 +37,10 @@ export interface NotionPage {
   url?: string;
   public_url?: null | string;
 }
+
+export interface FormattedData {
+  Name: string;
+  Website: string;
+  Phone: string;
+  Notion_ID__c: string;
+}
