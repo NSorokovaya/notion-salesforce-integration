@@ -1,4 +1,4 @@
-import { salesforceConnection } from '../../src/connections/salesforceConnection';
+import { getSalesforceConnection } from '../../src/connections/salesforceConnection';
 import {
   loginToSalesforce,
   updateSalesforce,
@@ -8,6 +8,15 @@ import logger from '../../src/utils/logger';
 jest.mock('../../src/utils/logger');
 jest.mock('../../src/connections/salesforceConnection');
 jest.mock('../../src/utils/logger');
+
+const mockSalesforceConnection = {
+  login: jest.fn(),
+  sobject: jest.fn(),
+};
+
+(getSalesforceConnection as jest.Mock).mockResolvedValue(
+  mockSalesforceConnection,
+);
 
 const mockNotionData = [
   {
@@ -36,14 +45,17 @@ const mockNotionData = [
 
 describe('Salesforce Service', () => {
   describe('loginToSalesforce', () => {
-    it('should login to Salesforce successfully', async () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
       process.env.SALESFORCE_USERNAME = expect.any(String);
       process.env.SALESFORCE_PASSWORD = expect.any(String);
       process.env.SALESFORCE_SECURITY_TOKEN = expect.any(String);
+    });
 
+    it('should login to Salesforce successfully', async () => {
       await loginToSalesforce();
 
-      expect(salesforceConnection.login).toHaveBeenCalledWith(
+      expect(mockSalesforceConnection.login).toHaveBeenCalledWith(
         expect.any(String),
         expect.any(String),
       );
@@ -63,27 +75,35 @@ describe('Salesforce Service', () => {
     });
 
     it('should throw an error when Salesforce login fails', async () => {
-      process.env.SALESFORCE_USERNAME = expect.any(String);
-      process.env.SALESFORCE_PASSWORD = expect.any(String);
-      process.env.SALESFORCE_SECURITY_TOKEN = expect.any(String);
-
-      (salesforceConnection.login as jest.Mock).mockRejectedValue(new Error());
+      (mockSalesforceConnection.login as jest.Mock).mockRejectedValue(
+        new Error(),
+      );
 
       await expect(loginToSalesforce()).rejects.toThrow();
     });
   });
 
   describe('updateSalesforce', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      process.env.SALESFORCE_USERNAME = expect.any(String);
+      process.env.SALESFORCE_PASSWORD = expect.any(String);
+      process.env.SALESFORCE_SECURITY_TOKEN = expect.any(String);
+    });
+
     it('should update Salesforce with Notion data', async () => {
       const mockUpsertResult = { success: true, id: expect.any(String) };
+
       const mockSobject = {
         upsert: jest.fn().mockResolvedValue(mockUpsertResult),
       };
-      (salesforceConnection.sobject as jest.Mock).mockReturnValue(mockSobject);
+
+      mockSalesforceConnection.sobject.mockReturnValue(mockSobject);
 
       await updateSalesforce(mockNotionData);
 
-      expect(salesforceConnection.sobject).toHaveBeenCalledWith('Account');
+      expect(mockSalesforceConnection.sobject).toHaveBeenCalledWith('Account');
+
       expect(mockSobject.upsert).toHaveBeenCalledWith(
         expect.objectContaining({
           Name: expect.any(String),
@@ -97,11 +117,15 @@ describe('Salesforce Service', () => {
 
     it('should handle errors when updating Salesforce', async () => {
       const mockSobject = {
-        upsert: jest.fn().mockRejectedValue(new Error()),
+        upsert: jest.fn().mockRejectedValue(new Error('Upsert failed')),
       };
-      (salesforceConnection.sobject as jest.Mock).mockReturnValue(mockSobject);
+      (mockSalesforceConnection.sobject as jest.Mock).mockReturnValue(
+        mockSobject,
+      );
 
-      await updateSalesforce(mockNotionData);
+      await expect(updateSalesforce(mockNotionData)).rejects.toThrow(
+        'Error updating Salesforce.',
+      );
 
       expect(logger.error).toHaveBeenCalledWith(
         'Error updating Salesforce:',

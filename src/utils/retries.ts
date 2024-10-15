@@ -1,5 +1,5 @@
 import { MAX_RETRIES, RETRY_DELAY } from '../constants';
-import { delay } from './functions';
+import { delay } from './utils';
 
 export async function retryWithDelay<T>(
   fn: () => Promise<T>,

@@ -10,6 +10,6 @@ export async function getNotionData() {
     return response.results;
   } catch (error) {
     logger.error('Error fetching Notion data:', error);
-    throw error;
+    throw new Error('Error fetching Notion data.');
   }
 }

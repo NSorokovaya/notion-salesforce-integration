@@ -1,4 +1,4 @@
-import { salesforceConnection } from './src/connections/salesforceConnection';
+import { getSalesforceConnection } from './src/connections/salesforceConnection';
 import { getNotionData } from './src/services/notionService';
 import {
   loginToSalesforce,
@@ -8,9 +8,28 @@ import logger from './src/utils/logger';
 import { retryWithDelay } from './src/utils/retries';
 import { NotionPage } from './types';
 
+process.on('uncaughtException', (error) => {
+  logger.error('Uncaught Exception:', error.message);
+  logger.error(error.stack);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise);
+  logger.error('Reason:', reason);
+  process.exit(1);
+});
+
 const teardown = async () => {
   try {
-    await salesforceConnection.logout();
+    const connection = await getSalesforceConnection();
+
+    if (!connection) {
+      logger.error('No Salesforce connection available. Skipping data update.');
+      throw new Error('No Salesforce connection available.');
+    }
+
+    await connection.logout();
     logger.info('Logged out from Salesforce');
   } catch (logoutError: unknown) {
     if (logoutError instanceof Error) {
@@ -37,6 +56,7 @@ const teardown = async () => {
     } else {
       logger.error('Integration error:', error);
     }
+    process.exit(1);
   } finally {
     await teardown();
   }

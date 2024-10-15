@@ -23,9 +23,11 @@ describe('Notion Service', () => {
   });
 
   it('should throw an error when Notion query fails', async () => {
-    const mockError = new Error('Notion API error');
+    const mockError = new Error('Error fetching Notion data.');
     (notion.databases.query as jest.Mock).mockRejectedValue(mockError);
 
-    await expect(getNotionData()).rejects.toThrow('Notion API error');
+    await expect(getNotionData()).rejects.toThrow(
+      'Error fetching Notion data.',
+    );
   });
 });

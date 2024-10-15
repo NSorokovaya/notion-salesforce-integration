@@ -1,12 +1,29 @@
-import jsforce from 'jsforce';
+import { Connection } from 'jsforce';
 import logger from '../utils/logger';
+import { retryWithDelay } from '../utils/retries';
 
-const SALESFORCE_URL = process.env.SALESFORCE_URL;
+let connection: Connection | null = null;
 
-if (!SALESFORCE_URL) {
-  logger.error('SALESFORCE_URL is not set in the environment variables');
-}
+export const getSalesforceConnection = async () => {
+  const SALESFORCE_URL = process.env.SALESFORCE_URL;
 
-export const salesforceConnection = new jsforce.Connection({
-  loginUrl: SALESFORCE_URL,
-});
+  if (!SALESFORCE_URL) {
+    logger.error('SALESFORCE_URL is not set in the environment variables');
+    return null;
+  }
+  if (!connection) {
+    try {
+      connection = await retryWithDelay(
+        async () =>
+          new Connection({
+            loginUrl: SALESFORCE_URL,
+          }),
+      );
+      logger.info('Connected to Salesforce');
+    } catch (error) {
+      logger.error('Failed to  connect:', error);
+      connection = null;
+    }
+  }
+  return connection;
+};
